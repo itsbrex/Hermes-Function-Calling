@@ -130,11 +130,11 @@ Here's an example of the inference output:
 Fetch the stock fundamentals data for Tesla (TSLA)<|im_end|>
 <|im_start|>assistant
 <tool_call>
-{'arguments': {'symbol': 'TSLA'}, 'name': 'get_stock_fundamentals'}
+{"name": "get_stock_fundamentals", "arguments": {"symbol": "TSLA"}}
 </tool_call><|im_end|>
 <|im_start|>tool
 <tool_response>
-{"name": "get_stock_fundamentals", "content": {'symbol': 'TSLA', 'company_name': 'Tesla, Inc.', 'sector': 'Consumer Cyclical', 'industry': 'Auto Manufacturers', 'market_cap': 611384164352, 'pe_ratio': 49.604652, 'pb_ratio': 9.762013, 'dividend_yield': None, 'eps': 4.3, 'beta': 2.427, '52_week_high': 299.29, '52_week_low': 152.37}}
+{"name": "get_stock_fundamentals", "content": {"symbol": "TSLA", "company_name": "Tesla, Inc.", "sector": "Consumer Cyclical", "industry": "Auto Manufacturers", "market_cap": 611384164352, "pe_ratio": 49.604652, "pb_ratio": 9.762013, "dividend_yield": null, "eps": 4.3, "beta": 2.427, "52_week_high": 299.29, "52_week_low": 152.37}}
 </tool_response>
 <|im_end|>
 <|im_start|>assistant
@@ -191,9 +191,9 @@ Our model was trained on specific system prompts and structures for Function Cal
 You should use the system role with this message, followed by a function signature json as this example shows here.
 ```
 <|im_start|>system
-You are a function calling AI model. You are provided with function signatures within <tools></tools> XML tags. You may call one or more functions to assist with the user query. Don't make assumptions about what values to plug into functions. Here are the available tools: <tools> [{'type': 'function', 'function': {'name': 'get_stock_fundamentals', 'description': 'Get fundamental data for a given stock symbol using yfinance API.', 'parameters': {'type': 'object', 'properties': {'symbol': {'type': 'string'}}, 'required': ['symbol']}}}] </tools> Use the following pydantic model json schema for each tool call you will make: {'title': 'FunctionCall', 'type': 'object', 'properties': {'arguments': {'title': 'Arguments', 'type': 'object'}, 'name': {'title': 'Name', 'type': 'string'}}, 'required': ['arguments', 'name']} For each function call return a json object with function name and arguments within <tool_call></tool_call> XML tags as follows:
+You are a function calling AI model. You are provided with function signatures within <tools></tools> XML tags. You may call one or more functions to assist with the user query. Don't make assumptions about what values to plug into functions. Here are the available tools: <tools> [{"type": "function", "function": {"name": "get_stock_fundamentals", "description": "Get fundamental data for a given stock symbol using yfinance API.", "parameters": {"type": "object", "properties": {"symbol": {"type": "string"}}, "required": ["symbol"]}}}] </tools> Use the following pydantic model json schema for each tool call you will make: {"title": "FunctionCall", "type": "object", "properties": {"name": {"title": "Name", "type": "string"}, "arguments": {"title": "Arguments", "type": "object"}}, "required": ["name", "arguments"]} For each function call return a json object with function name and arguments within <tool_call></tool_call> XML tags as follows:
 <tool_call>
-{'arguments': <args-dict>, 'name': <function-name>}
+{"name": <function-name>, "arguments": <args-dict>}
 </tool_call><|im_end|>
 ```
 
@@ -206,10 +206,10 @@ Hermes-3 tool-use template:
 ```xml
 You are a function calling AI model. You are provided with function signatures within <tools> </tools> XML tags. You may call one or more functions to assist with the user query. If available tools are not relevant in assisting with user query, just respond in natural conversational language. Don't make assumptions about what values to plug into functions. After calling & executing the functions, you will be provided with function results within <tool_response> </tool_response> XML tags.
 <tools>
-[{'type': 'function', 'function': {'name': 'get_stock_fundamentals', 'description': 'Get fundamental data for a given stock symbol using yfinance API.', 'parameters': {'type': 'object', 'properties': {'symbol': {'type': 'string'}}, 'required': ['symbol']}}}]
+[{"type": "function", "function": {"name": "get_stock_fundamentals", "description": "Get fundamental data for a given stock symbol using yfinance API.", "parameters": {"type": "object", "properties": {"symbol": {"type": "string"}}, "required": ["symbol"]}}}]
 </tools>
 For each function call return a JSON object, with the following pydantic model json schema:
-{'title': 'FunctionCall', 'type': 'object', 'properties': {'name': {'title': 'Name', 'type': 'string'}, 'arguments': {'title': 'Arguments', 'type': 'object'}}, 'required': ['arguments', 'name']}
+{"title": "FunctionCall", "type": "object", "properties": {"name": {"title": "Name", "type": "string"}, "arguments": {"title": "Arguments", "type": "object"}}, "required": ["name", "arguments"]}
 Each function call should be enclosed within <tool_call> </tool_call> XML tags. You must use <scratch_pad> </scratch_pad> XML tags to record your reasoning and planning before you call the functions as follows.
 Example:
 <scratch_pad>
@@ -223,7 +223,7 @@ Observation: <set observation 'None' with tool calls; plan final tools results s
 Reflection: <evaluate query-tool relevance and required parameters when tools called; analyze overall task status when observations made>
 </scratch_pad>
 <tool_call>
-{'name': <function-name>, 'arguments': <args-dict>}
+{"name": <function-name>, "arguments": <args-dict>}
 </tool_call>
 ```
 To complete the function call, create a user prompt that follows the above system prompt, like so:
@@ -235,14 +235,14 @@ The model will then generate a tool call, which your inference code must parse, 
 ```
 <|im_start|>assistant
 <tool_call>
-{'arguments': {'symbol': 'TSLA'}, 'name': 'get_stock_fundamentals'}
+{"name": "get_stock_fundamentals", "arguments": {"symbol": "TSLA"}}
 </tool_call><|im_end|>
 ```
 Once you parse the tool call, call the api and get the returned values for the call, and pass it back in as a new role, tool like so:
 ```
 <|im_start|>tool
 <tool_response>
-{"name": "get_stock_fundamentals", "content": {'symbol': 'TSLA', 'company_name': 'Tesla, Inc.', 'sector': 'Consumer Cyclical', 'industry': 'Auto Manufacturers', 'market_cap': 611384164352, 'pe_ratio': 49.604652, 'pb_ratio': 9.762013, 'dividend_yield': None, 'eps': 4.3, 'beta': 2.427, '52_week_high': 299.29, '52_week_low': 152.37}}
+{"name": "get_stock_fundamentals", "content": {"symbol": "TSLA", "company_name": "Tesla, Inc.", "sector": "Consumer Cyclical", "industry": "Auto Manufacturers", "market_cap": 611384164352, "pe_ratio": 49.604652, "pb_ratio": 9.762013, "dividend_yield": null, "eps": 4.3, "beta": 2.427, "52_week_high": 299.29, "52_week_low": 152.37}}
 </tool_response>
 <|im_end|>
 ```
